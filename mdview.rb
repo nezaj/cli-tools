@@ -4,9 +4,9 @@ require 'github/markup'
 require 'launchy'
 
 HELP = <<-help
-              Usage: gfm <file>
-              Preview a GitHub-Flavored Markdown file in your browser
-            help
+  Usage: gfm <file>
+  Preview a GitHub-Flavored Markdown file in your browser
+help
 
 if ARGV.include?('--help')
   puts HELP
