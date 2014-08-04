@@ -1,0 +1,12 @@
+/* CSS for daily log templates */
+.date { font-size: 18px; }
+.tag { font-size: 13px; }
+
+.date, .tag {
+    font-weight: bold;
+}
+
+.date, .dash, .tag {
+    color: black;
+    font-family: "Arial";
+}

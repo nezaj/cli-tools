@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <style>
+    {% include "logs/daily.css" %}
+  </style>
+</head>
+<body>
+  {% set tab = '&nbsp;&nbsp;&nbsp;&nbsp;' %}
+  {% for date in dates %}
+    <div class="entry">
+      <div class='date'>{{ date }}</div>
+      {% for tag in tags %}
+        <div class='tag'>{{ tag }}:</div>
+      {% endfor %}
+      <div class="dash">{{ tab }}-</div>
+      <br>
+    </div>
+  {% endfor %}
+</body>
+</html>
