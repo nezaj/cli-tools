@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 """
-Creates pre-filled templates for my daily logs
+CLI tool for quickly generating my daily log templates.
 
 TODO: Write tests so you can refactor
 TODO: Use a class-based approach for generating different logs
 """
-import click
 from datetime import datetime, timedelta
+
+# Let's try using click instead of argparse
+import click
 
 # Used for generating and outputting dates
 INPUT_DATE_FORMAT = '%m/%d/%y'
@@ -91,7 +93,7 @@ def main(log, date, days):
     templates are saved in the logs folder
     """
 
-    # If a date is provied it will be a string -- want to convert it to a datetime object
+    # If a date is provided it will be a string -- want to convert it to a datetime object
     if date != today():
         date = to_datetime(date)
 
@@ -104,6 +106,7 @@ def main(log, date, days):
     generate_log = generator_dict[log]
     generate_log(date_strings)
 
+# Use this dictionary to fetch the desired generator -- much cleaner than using a bunch of if/else statements
 generator_dict = {
     'personal': generate_personal_entries,
     'programming': generate_programming_entries,
