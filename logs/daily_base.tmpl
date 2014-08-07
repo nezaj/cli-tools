@@ -8,7 +8,9 @@
   </style>
 </head>
 <body>
-  {% set tab = '&nbsp;&nbsp;&nbsp;&nbsp;' %}
+  {# Evernote uses 5 spaces for tab #}
+  {% set num_spaces = 5 %}
+  {% set tab = '&nbsp;'* num_spaces %}
   {% for date in dates %}
     <div class="entry">
       <div class='date'>{{ date }}</div>
