@@ -41,7 +41,7 @@ class BaseLog(object):
 
 class PersonalLog(BaseLog):
 
-    TAGS = ['Social', 'Felt', 'Done']
+    TAGS = ['Social', 'Done']
     LOG_OUTPUT = 'logs/personal_log.html'
 
 class ProgrammingLog(BaseLog):
