@@ -1,59 +1,71 @@
 #!/usr/bin/env python
+"""CLI tool for printing file directory structure
 
-"""
 Usage: pfs <dir> [-d <int>]
-CLI tool for printing file directory structure
-"""
 
+"""
 import argparse
 import os
 
-EXCLUDE_EXTS = [
-    '.md',
+EXCLUDE_EXTS = {
     '.pyc',
-    '.css',
-    '.scss',
     '.ico'
-]
+}
 
-def is_dotfile(f):
-    return f[0] == '.'
+def get_items_from_dir(path):
+    """Return a sorted list of all entries in path.
 
-def is_excluded_ext(f, exts=EXCLUDE_EXTS):
-    return f[f.find('.'):] in exts
-
-def is_too_deep(depth, max_depth=3):
-    return depth > max_depth
-
-def get_dirlist(path):
-    """
-    Return a sorted list of all entries in path.
     This returns just the names, not the full path to the names.
     """
-    dirlist = os.listdir(path)
-    dirlist.sort()
-    return dirlist
+    items = os.listdir(path)
+    items.sort()
+    return items
+
+def is_blacklisted(fname):
+    """ Indicates whether the file should not be printed """
+    return is_dot(fname) or is_excluded_filetype(fname)
+
+def is_dot(f):
+    """ Indicates whether this is a dot file/folder """
+    return f.startswith('.')
+
+def is_excluded_filetype(f):
+    """Indicates whether the file type is not permitted
+
+    Returns False if no extension is found
+    """
+    index = f.find('.')
+    if index < 0:
+        return False
+
+    ext = f[index:]
+    return ext in EXCLUDE_EXTS
 
 def print_files(path, max_depth, prefix="", depth=1):
-    " Print recursive listing of contents of path "
+    """ Print recursive listing of contents of path """
     indent = "| "
-    if prefix == "":
-        print os.path.abspath(path)
-        prefix = indent
+    prefix = prefix if prefix else indent
 
-    dirlist = get_dirlist(path)
-    for f in dirlist:
-        if is_dotfile(f) or is_excluded_ext(f) or is_too_deep(depth, max_depth):
+    items = get_items_from_dir(path)
+    for item in items:
+
+        if is_blacklisted(item):
             continue
-        print(prefix + f)
-        fullname = os.path.join(path, f)
-        if os.path.isdir(fullname):
-            print_files(fullname, max_depth, prefix + indent, depth + 1)
+
+        full_path = os.path.join(path, item)
+
+        # Recurse on subdirectories to print their files
+        if os.path.isdir(item):
+            if depth > max_depth:
+                continue  # Too deep, don't print out files for this subdirectory
+            print_files(full_path, max_depth, prefix + indent, depth + 1)
+
+        print(prefix + item)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Tool for printing file directory structure')
     parser.add_argument('path', help="Path to directory to print out")
-    parser.add_argument('--depth', '-d', type=int, default=3, help="Max recursive depth")
+    parser.add_argument('--max_depth', '-md', type=int, default=3, help="Max recursive depth")
 
     args = parser.parse_args()
-    print_files(path=args.path, max_depth=args.depth)
+    print_files(path=args.path, max_depth=args.max_depth)
