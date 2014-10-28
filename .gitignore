@@ -1,2 +1,3 @@
 # Don't track generated log templates
+tmp/*
 logs/*.html
