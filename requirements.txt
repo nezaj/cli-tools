@@ -1,0 +1,8 @@
+Jinja2==2.7.3
+MarkupSafe==0.23
+click==2.5
+python-dateutil==2.2
+pytz==2014.7
+requests==2.4.3
+six==1.8.0
+wsgiref==0.1.2

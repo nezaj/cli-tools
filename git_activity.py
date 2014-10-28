@@ -11,6 +11,7 @@ from collections import defaultdict, namedtuple, OrderedDict
 from datetime import datetime, timedelta
 import json
 import os
+import subprocess
 
 import click
 import dateutil.parser
@@ -23,25 +24,47 @@ pacific_tz = pytz.timezone('US/Pacific')
 
 # Used for converting datetime objects into strings and vice versa
 INPUT_DATE_FORMAT = '%m/%d/%y'
-OUTPUT_DATE_FORMAT = '%m/%d/%y'
+ISO8601_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
+OUTPUT_DATE_FORMAT = '%m/%d/%y (%A)'
 
+# I use this to build urls from tuples of json data
+# This is easier to manage then remembering which index of the tuple
+# corresponds to which piece of information
 Repo = namedtuple('Repo', 'owner, name')
 
-def date_to_string(d):
-    """ Returns formatted string representation of a date from a datetime object """
-    return d.strftime(OUTPUT_DATE_FORMAT)
+def date_to_iso8601_string(d):
+    """
+    Returns iso8601 string representation of a date from a datetime object
+    Using this when dealing with github API
+    """
+    return d.strftime(ISO8601_DATE_FORMAT)
+
+def date_to_ouput_string(do):
+    """
+    Returns formatted string representation of a date from a datetime object
+    Using this to return a pretty format of the date for the file generated
+    when I'm done
+    """
+    return do.strftime(OUTPUT_DATE_FORMAT)
 
 def s_to_iso8601(s):
-    """Convert a string to a ISO 8601 date-string"""
+    """
+    Convert a string to a ISO 8601 date-string
+    Use this for dealing with github API
+    """
     return dateutil.parser.parse(s)
 
 def strip_time(d):
-    """Remove time time component from a datetime object"""
+    """
+    Remove time time component from a datetime object
+    Useful for just getting the current date as a datetime object so
+    it can be timezone aware
+    """
     return d.replace(hour=0, minute=0, second=0, microsecond=0)
 
 def to_datetime(s):
-    """ Returns datetime object from a formatted string """
-    return datetime.strptime(s, INPUT_DATE_FORMAT).astimezone(pacific_tz)
+    """Returns timezone aware datetime object from a formatted string """
+    return datetime.strptime(s, INPUT_DATE_FORMAT)
 
 def today():
     """Returns date-string datetime object representing the current date"""
@@ -56,7 +79,7 @@ def main(date, days):
     # If this is true, that means a date was specified in the command-line
     # In that case it will be a string, will need to make it a datetime object to use timedelta below
     if date != today():
-        date = to_datetime(date)
+        date = to_datetime(date).astimezone(pacific_tz)
     start_date = date - timedelta(days + 1)  # Add one day because Github API does not include the earliest date when filtering
 
     # I use this to get my repos
@@ -90,12 +113,12 @@ def main(date, days):
         'apk-storage',
         'python-quixeycloud',
     ]
-    for repo_name in my_quixey_repos:
-        updated_repos.append(Repo(quixey_username, repo_name))
+    for repo in my_quixey_repos:
+        updated_repos.append(Repo(quixey_username, repo))
 
     # Commits endpoint supports filtering by author and date
-    start_date_str = date_to_string(start_date_utc)
-    end_date_str = date_to_string(today())
+    start_date_str = date_to_iso8601_string(start_date_utc)
+    end_date_str = date_to_iso8601_string(today())
     repo_commit_payload = {'author': my_username, 'since': start_date_str, 'until': end_date_str}
 
     # Build activity dict from commit endpoint
@@ -112,24 +135,32 @@ def main(date, days):
             # Extract commit message
             commit_msg = repo_commit['commit']['message']
             commit_msg = commit_msg[:commit_msg.find('\n')]  # Extract first line only
-            repo_commit_msg = '{}: {}'.format(repo.name, commit_msg)
-
-            # Extract commit date
-            commit_dt = repo_commit['commit']['author']['date']
-            commit_dt_utc = strip_time(s_to_iso8601(commit_dt))
-            commit_dt_str = date_to_string(commit_dt_utc)
+            # repo_commit_msg = '{}: {}'.format(repo.name, commit_msg)
 
             # Some commits may be earlier since they were pushed upstream later
             # I don't want to include these for logging purposes
-            if commit_dt_str >= start_date_str:
-                activity[commit_dt_str].append(repo_commit_msg)
+            commit_dt = repo_commit['commit']['author']['date']
+            if commit_dt >= start_date_str:
+                # Convert commit_dt to output format and add to activity dict
+                commit_dt_utc = strip_time(s_to_iso8601(commit_dt))
+                commit_dt_str = date_to_ouput_string(commit_dt_utc)
+                activity[commit_dt_str].append((repo.name, commit_msg))
 
+    # Write activity to file in reverse chronological order
+    filename = 'tmp/git-activity.html'
     activity = OrderedDict(sorted(activity.items(), reverse=True))
-    for date, messages in activity.iteritems():
-        print "\n{}".format(date)
-        print '-' * 50  # Seperator between the date and commit messages
-        for msg in messages:
-            print msg
+    with open(filename, 'w+') as f:
+        for date, commit in activity.iteritems():
+            f.write("<h2>{}:</h2>".format(date))
+            f.write('<ul>')
+            for repo_name, msg in commit:
+                f.write('<li>')
+                f.write('<b>{}:</b> {}'.format(repo_name, msg))
+                f.write('</li>'.format(msg))
+            f.write('</ul>')
+
+    # Open the file so I can copy and paste
+    subprocess.call(['open', filename])
 
 if __name__ == '__main__':
     main()
