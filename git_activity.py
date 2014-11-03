@@ -112,6 +112,7 @@ def main(date, days):
     my_quixey_repos = [
         'apk-storage',
         'python-quixeycloud',
+        'GooglePlayDownloader',
     ]
     for repo in my_quixey_repos:
         updated_repos.append(Repo(quixey_username, repo))
@@ -134,8 +135,8 @@ def main(date, days):
         for repo_commit in repo_commit_json:
             # Extract commit message
             commit_msg = repo_commit['commit']['message']
-            commit_msg = commit_msg[:commit_msg.find('\n')]  # Extract first line only
-            # repo_commit_msg = '{}: {}'.format(repo.name, commit_msg)
+            if commit_msg.find('\n') > 0:
+                commit_msg = commit_msg[:commit_msg.find('\n')]  # Only want first line
 
             # Some commits may be earlier since they were pushed upstream later
             # I don't want to include these for logging purposes
