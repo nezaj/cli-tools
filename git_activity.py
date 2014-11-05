@@ -64,7 +64,7 @@ def strip_time(d):
 
 def to_datetime(s):
     """Returns timezone aware datetime object from a formatted string """
-    return datetime.strptime(s, INPUT_DATE_FORMAT)
+    return datetime.strptime(s, INPUT_DATE_FORMAT).replace(tzinfo=pacific_tz)
 
 def today():
     """Returns date-string datetime object representing the current date"""
@@ -79,7 +79,7 @@ def main(date, days):
     # If this is true, that means a date was specified in the command-line
     # In that case it will be a string, will need to make it a datetime object to use timedelta below
     if date != today():
-        date = to_datetime(date).astimezone(pacific_tz)
+        date = to_datetime(date)
     start_date = date - timedelta(days + 1)  # Add one day because Github API does not include the earliest date when filtering
 
     # I use this to get my repos
