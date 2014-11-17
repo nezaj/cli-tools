@@ -91,7 +91,7 @@ class ProgrammingLog(BaseLog):
 class SixPackLog(BaseLog):
     """ Metadata for my sixpack log """
 
-    TAGS = ['Lift', 'Cardio', 'Diet']
+    TAGS = ['No Sugar', 'Exercise', 'Diet']
     LOG_OUTPUT = generate_log_path('sixpack_log.html')
 
 def date_to_string(do):
