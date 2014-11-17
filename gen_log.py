@@ -79,7 +79,7 @@ class BaseLog(object):
 class PersonalLog(BaseLog):
     """ Metadata for my personal log """
 
-    TAGS = ['Social', 'Done']
+    TAGS = ['Done']
     LOG_OUTPUT = generate_log_path('personal_log.html')
 
 class ProgrammingLog(BaseLog):
