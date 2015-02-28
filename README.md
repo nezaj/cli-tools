@@ -6,7 +6,12 @@ Custom CLI tools to make my life easier
 * `mdview` preview markdown file in chrome
 
 ### Dependencies
-Make sure `/usr/local/bin` is in `PATH`. Install [Markdown][markdown-install] and move `Markdown.pl` to `usr/local/bin`.
+Make sure `/usr/local/bin` is in `PATH`. We'll also need a couple of ruby gems
+```
+gem install markdown
+gem install github-markup
+gem install launchy
+```
 
 ### Installing
 ```
