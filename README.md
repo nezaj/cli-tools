@@ -15,9 +15,11 @@ gem install launchy
 
 ### Installing
 ```
-git clone https://github.com/nezaj/cli-tools.git
+git clone https://github.com/nezaj/cli-tools.git ~/cli-tools
 cd cli-tools
 ./setup.sh
+mkvirtualenv cli-tools
+pip install -r requirements.txt
 ```
 Commands like `pfs` and `mdview` should now be available in the terminal. Huzzah!
 
